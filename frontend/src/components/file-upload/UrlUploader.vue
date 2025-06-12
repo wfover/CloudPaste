@@ -2,19 +2,19 @@
   <div class="url-uploader">
     <!-- URL输入区域 -->
     <div
-      class="url-input-zone mb-5 border-2 border-dashed rounded-lg transition-all duration-300 overflow-hidden"
-      :class="darkMode ? 'border-gray-600 bg-gray-800/30' : 'border-gray-300 bg-gray-50'"
+        class="url-input-zone mb-5 border-2 border-dashed rounded-lg transition-all duration-300 overflow-hidden"
+        :class="darkMode ? 'border-gray-600 bg-gray-800/30' : 'border-gray-300 bg-gray-50'"
     >
       <!-- 上部图标和说明 -->
       <div class="flex flex-col items-center justify-center py-4 px-4">
         <div class="icon-container mb-2 bg-opacity-10 p-2 rounded-full" :class="darkMode ? 'bg-blue-600' : 'bg-blue-100'">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-8 w-8 transition-colors duration-300"
-            :class="darkMode ? 'text-blue-400' : 'text-blue-600'"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8 transition-colors duration-300"
+              :class="darkMode ? 'text-blue-400' : 'text-blue-600'"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
           >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.172 13.828a4 4 0 015.656 0l4 4a4 4 0 01-5.656 5.656l-1.102-1.101" />
@@ -34,26 +34,26 @@
       <div class="px-4 pb-6">
         <div class="w-full max-w-md mx-auto relative">
           <div
-            class="input-wrapper relative rounded-lg overflow-hidden shadow-sm"
-            :class="[darkMode ? 'shadow-gray-800' : 'shadow-gray-200', urlInput ? (darkMode ? 'ring-1 ring-blue-600/50' : 'ring-1 ring-blue-500/50') : '']"
+              class="input-wrapper relative rounded-lg overflow-hidden shadow-sm"
+              :class="[darkMode ? 'shadow-gray-800' : 'shadow-gray-200', urlInput ? (darkMode ? 'ring-1 ring-blue-600/50' : 'ring-1 ring-blue-500/50') : '']"
           >
             <input
-              type="url"
-              v-model="urlInput"
-              class="form-input w-full pr-[110px] rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent h-12 px-4"
-              :class="[
+                type="url"
+                v-model="urlInput"
+                class="form-input w-full pr-[110px] rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent h-12 px-4"
+                :class="[
                 darkMode
                   ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                   : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
               ]"
-              :placeholder="t('file.urlPlaceholder')"
-              :disabled="isAnalyzing || isUploading"
+                :placeholder="t('file.urlPlaceholder')"
+                :disabled="isAnalyzing || isUploading"
             />
             <button
-              type="button"
-              @click="analyzeUrl"
-              class="absolute right-0 top-0 h-full px-4 font-medium focus:outline-none transition-colors flex items-center justify-center min-w-[100px] rounded-r-md"
-              :class="[
+                type="button"
+                @click="analyzeUrl"
+                class="absolute right-0 top-0 h-full px-4 font-medium focus:outline-none transition-colors flex items-center justify-center min-w-[100px] rounded-r-md"
+                :class="[
                 isAnalyzing
                   ? darkMode
                     ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
@@ -63,14 +63,14 @@
                   : 'bg-blue-600 hover:bg-blue-700 text-white',
                 !urlInput ? (darkMode ? 'opacity-60' : 'opacity-60') : '',
               ]"
-              :disabled="!urlInput || isAnalyzing || isUploading"
+                :disabled="!urlInput || isAnalyzing || isUploading"
             >
               <svg v-if="isAnalyzing" class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
               {{ isAnalyzing ? t("file.analyzing") : t("file.analyze") }}
@@ -91,28 +91,28 @@
       <div class="files-header flex justify-between items-center mb-2">
         <h3 class="text-sm font-medium flex items-center" :class="darkMode ? 'text-gray-200' : 'text-gray-700'">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 mr-1.5"
-            :class="darkMode ? 'text-blue-400' : 'text-blue-600'"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 mr-1.5"
+              :class="darkMode ? 'text-blue-400' : 'text-blue-600'"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
           {{ t("file.urlFileInfo") }}
         </h3>
         <button
-          type="button"
-          @click="clearFileInfo"
-          class="text-xs px-2 py-1 rounded transition-colors flex items-center"
-          :class="darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'"
-          :disabled="isUploading"
+            type="button"
+            @click="clearFileInfo"
+            class="text-xs px-2 py-1 rounded transition-colors flex items-center"
+            :class="darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'"
+            :disabled="isUploading"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -147,16 +147,16 @@
             {{ t("file.customFileName") }}
           </label>
           <input
-            type="text"
-            v-model="customFilename"
-            class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent py-2"
-            :class="[
+              type="text"
+              v-model="customFilename"
+              class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent py-2"
+              :class="[
               darkMode
                 ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                 : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
             ]"
-            :placeholder="displayFilename || t('file.customFilename')"
-            :disabled="isUploading"
+              :placeholder="displayFilename || t('file.customFilename')"
+              :disabled="isUploading"
           />
         </div>
       </div>
@@ -173,27 +173,27 @@
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.storage") }}</label>
               <div class="relative">
                 <select
-                  v-model="formData.s3_config_id"
-                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent appearance-none"
-                  :class="[
+                    v-model="formData.s3_config_id"
+                    class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent appearance-none"
+                    :class="[
                     darkMode
                       ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                       : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                   ]"
-                  :disabled="!s3Configs.length || loading || isUploading"
-                  required
+                    :disabled="!s3Configs.length || loading || isUploading"
+                    required
                 >
                   <option value="" disabled selected>{{ s3Configs.length ? t("file.selectStorage") : t("file.noStorage") }}</option>
                   <option v-for="config in s3Configs" :key="config.id" :value="config.id">{{ config.name }} ({{ config.provider_type }})</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
-                    :class="darkMode ? 'text-gray-400' : 'text-gray-500'"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      :class="darkMode ? 'text-gray-400' : 'text-gray-500'"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                   >
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
@@ -205,16 +205,16 @@
             <div class="form-group flex flex-col">
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.path") }}</label>
               <input
-                type="text"
-                v-model="formData.path"
-                class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
-                :class="[
+                  type="text"
+                  v-model="formData.path"
+                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
+                  :class="[
                   darkMode
                     ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                 ]"
-                :placeholder="t('file.pathPlaceholder')"
-                :disabled="isUploading"
+                  :placeholder="t('file.pathPlaceholder')"
+                  :disabled="isUploading"
               />
             </div>
           </div>
@@ -230,16 +230,16 @@
             <div class="form-group flex flex-col">
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.remark") }}</label>
               <input
-                type="text"
-                v-model="formData.remark"
-                class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
-                :class="[
+                  type="text"
+                  v-model="formData.remark"
+                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
+                  :class="[
                   darkMode
                     ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                 ]"
-                :placeholder="t('file.remarkPlaceholder')"
-                :disabled="isUploading"
+                  :placeholder="t('file.remarkPlaceholder')"
+                  :disabled="isUploading"
               />
             </div>
 
@@ -247,18 +247,18 @@
             <div class="form-group flex flex-col">
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.customLink") }}</label>
               <input
-                type="text"
-                v-model="formData.slug"
-                class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
-                :class="[
+                  type="text"
+                  v-model="formData.slug"
+                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
+                  :class="[
                   darkMode
                     ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                   slugError ? (darkMode ? 'border-red-500' : 'border-red-600') : '',
                 ]"
-                :placeholder="t('file.customLinkPlaceholder')"
-                :disabled="isUploading"
-                @input="validateCustomLink"
+                  :placeholder="t('file.customLinkPlaceholder')"
+                  :disabled="isUploading"
+                  @input="validateCustomLink"
               />
               <p v-if="slugError" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ slugError }}</p>
               <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ t("file.onlyAllowedChars") }}</p>
@@ -268,16 +268,16 @@
             <div class="form-group flex flex-col">
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.passwordProtection") }}</label>
               <input
-                type="text"
-                v-model="formData.password"
-                class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
-                :class="[
+                  type="text"
+                  v-model="formData.password"
+                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
+                  :class="[
                   darkMode
                     ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                 ]"
-                :placeholder="t('file.passwordPlaceholder')"
-                :disabled="isUploading"
+                  :placeholder="t('file.passwordPlaceholder')"
+                  :disabled="isUploading"
               />
             </div>
 
@@ -285,14 +285,14 @@
             <div class="form-group flex flex-col">
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.expireTime") }}</label>
               <select
-                v-model="formData.expires_in"
-                class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
-                :class="[
+                  v-model="formData.expires_in"
+                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
+                  :class="[
                   darkMode
                     ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                 ]"
-                :disabled="isUploading"
+                  :disabled="isUploading"
               >
                 <option value="1">{{ t("file.expireOptions.hour1") }}</option>
                 <option value="24">{{ t("file.expireOptions.day1") }}</option>
@@ -306,20 +306,20 @@
             <div class="form-group flex flex-col">
               <label class="form-label text-sm font-medium mb-1.5" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.maxViews") }}</label>
               <input
-                type="number"
-                v-model.number="formData.max_views"
-                min="0"
-                step="1"
-                pattern="\d*"
-                class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
-                :class="[
+                  type="number"
+                  v-model.number="formData.max_views"
+                  min="0"
+                  step="1"
+                  pattern="\d*"
+                  class="form-input w-full rounded-md shadow-sm focus:ring-2 focus:ring-offset-1 focus:border-transparent"
+                  :class="[
                   darkMode
                     ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-600 focus:ring-offset-gray-800'
                     : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:ring-offset-white',
                 ]"
-                :placeholder="t('file.maxViewsPlaceholder')"
-                :disabled="isUploading"
-                @input="validateMaxViews"
+                  :placeholder="t('file.maxViewsPlaceholder')"
+                  :disabled="isUploading"
+                  @input="validateMaxViews"
               />
             </div>
           </div>
@@ -348,8 +348,8 @@
               <div class="flex items-center">
                 <span class="text-sm mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("file.uploadProgress") }}</span>
                 <span
-                  class="text-xs px-2 py-0.5 rounded mr-2"
-                  :class="[
+                    class="text-xs px-2 py-0.5 rounded mr-2"
+                    :class="[
                     currentStage === 'cancelled'
                       ? darkMode
                         ? 'bg-red-900/30 text-red-200'
@@ -395,9 +395,9 @@
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
               <div
-                class="h-2.5 rounded-full transition-all duration-200 ease-out relative overflow-hidden"
-                :class="[currentStage === 'cancelled' ? 'bg-red-600' : uploadProgress >= 95 ? 'bg-green-600' : 'bg-blue-600']"
-                :style="{ width: `${uploadProgress}%` }"
+                  class="h-2.5 rounded-full transition-all duration-200 ease-out relative overflow-hidden"
+                  :class="[currentStage === 'cancelled' ? 'bg-red-600' : uploadProgress >= 95 ? 'bg-green-600' : 'bg-blue-600']"
+                  :style="{ width: `${uploadProgress}%` }"
               >
                 <div class="progress-stripes absolute inset-0 w-full h-full" :class="uploadProgress < 100 ? 'animate-progress-stripes' : ''"></div>
               </div>
@@ -407,10 +407,10 @@
           <!-- 表单按钮 -->
           <div class="submit-section mt-6 flex flex-row items-center gap-3">
             <button
-              type="submit"
-              :disabled="!fileInfo || !formData.s3_config_id || isUploading || loading"
-              class="btn-primary px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center min-w-[120px]"
-              :class="[
+                type="submit"
+                :disabled="!fileInfo || !formData.s3_config_id || isUploading || loading"
+                class="btn-primary px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center min-w-[120px]"
+                :class="[
                 !fileInfo || !formData.s3_config_id || isUploading || loading
                   ? darkMode
                     ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
@@ -423,9 +423,9 @@
               <svg v-if="isUploading" class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
               {{ isUploading ? t("file.loading") : t("file.upload") }}
@@ -433,11 +433,11 @@
 
             <!-- 将取消按钮放在上传按钮右侧 -->
             <button
-              v-if="isUploading"
-              type="button"
-              @click="cancelUpload"
-              class="px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center border"
-              :class="
+                v-if="isUploading"
+                type="button"
+                @click="cancelUpload"
+                class="px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center border"
+                :class="
                 darkMode
                   ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-red-900/60 hover:text-red-200 hover:border-red-800 focus:ring-gray-500 focus:ring-offset-gray-800'
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-300 focus:ring-gray-300 focus:ring-offset-white'
@@ -458,23 +458,12 @@
 <script setup>
 import { ref, reactive, defineProps, defineEmits, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  validateUrlInfo,
-  getUrlUploadPresignedUrl,
-  uploadFromUrlToS3,
-  commitUrlUpload,
-  initializeMultipartUpload,
-  completeMultipartUpload,
-  abortMultipartUpload,
-  cancelUrlUpload,
-  S3MultipartUploader,
-  getProxyUrl,
-  createParts,
-  fetchUrlContent,
-} from "../../api/urlUploadService";
+import { api } from "../../api";
 // 导入文件类型工具
 import { getFileIcon } from "../../utils/fileTypeIcons";
 import * as MimeTypeUtils from "../../utils/mimeTypeUtils";
+// 导入URL验证API（后端增强检测）
+import { validateUrlInfo } from "../../api/services/urlUploadService.js";
 
 const { t } = useI18n(); // 初始化i18n
 
@@ -535,12 +524,12 @@ const formData = reactive({
 // 计算属性：显示友好的文件大小
 const displayFileSize = computed(() => {
   // 如果有明确的大小信息，使用它
-  if (fileInfo.value && fileInfo.value.size && fileInfo.value.size > 1024) {
+  if (fileInfo.value && fileInfo.value.size !== null && fileInfo.value.size !== undefined && fileInfo.value.size > 0) {
     return formatFileSize(fileInfo.value.size);
   }
 
-  // 如果没有明确的大小或大小太小（可能是Range请求的1KB），显示"未知大小"或"估计大小"
-  return t("file.unknownSize") || "未知大小";
+  // 如果没有大小信息，显示"未知大小"
+  return t("file.unknownSize");
 });
 
 // 计算属性：显示友好的MIME类型
@@ -586,21 +575,21 @@ const displayFilename = computed(() => {
 
 // 监听s3Configs变化，自动选择默认配置
 watch(
-  () => props.s3Configs,
-  (configs) => {
-    if (configs && configs.length > 0) {
-      // 查找默认配置
-      const defaultConfig = configs.find((config) => config.is_default);
-      if (defaultConfig) {
-        // 使用默认配置的ID
-        formData.s3_config_id = defaultConfig.id;
-      } else if (!formData.s3_config_id && configs.length > 0) {
-        // 如果没有默认配置且当前未选择配置，则选择第一个
-        formData.s3_config_id = configs[0].id;
+    () => props.s3Configs,
+    (configs) => {
+      if (configs && configs.length > 0) {
+        // 查找默认配置
+        const defaultConfig = configs.find((config) => config.is_default);
+        if (defaultConfig) {
+          // 使用默认配置的ID
+          formData.s3_config_id = defaultConfig.id;
+        } else if (!formData.s3_config_id && configs.length > 0) {
+          // 如果没有默认配置且当前未选择配置，则选择第一个
+          formData.s3_config_id = configs[0].id;
+        }
       }
-    }
-  },
-  { immediate: true } // 页面加载时立即执行
+    },
+    { immediate: true } // 页面加载时立即执行
 );
 
 /**
@@ -610,10 +599,6 @@ watch(
  */
 const getFileIconHtml = (filename) => {
   if (!filename) return getDefaultFileIcon();
-
-  // 使用 MimeTypeUtils 获取文件类型
-  const ext = MimeTypeUtils.getFileExtension(filename);
-  const fileType = MimeTypeUtils.getFileTypeFromExtension(ext);
 
   // 为了使用 getFileIcon 函数，需要构造一个模拟的文件项对象
   const mockFileItem = {
@@ -630,16 +615,16 @@ const getFileIconHtml = (filename) => {
  */
 const getDefaultFileIcon = () => {
   return `<svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full" viewBox="0 0 24 24" fill="none">
-    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" 
+    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
       stroke="${props.darkMode ? "#93c5fd" : "#3b82f6"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${
-    props.darkMode ? "#93c5fd" : "#3b82f6"
+      props.darkMode ? "#93c5fd" : "#3b82f6"
   }" fill-opacity="${props.darkMode ? "0.1" : "0.1"}"/>
     <path d="M14 2V8H20" stroke="${props.darkMode ? "#93c5fd" : "#3b82f6"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>`;
 };
 
 /**
- * 解析URL获取文件信息
+ * 解析URL获取文件信息（增强版）
  */
 const analyzeUrl = async () => {
   if (!urlInput.value || isAnalyzing.value || isUploading.value) return;
@@ -652,38 +637,61 @@ const analyzeUrl = async () => {
   try {
     // 验证URL格式
     if (!isValidUrl(urlInput.value)) {
-      urlError.value = t("file.invalidUrl");
+      urlError.value = t("file.messages.invalidUrl");
       isAnalyzing.value = false;
       return;
     }
 
-    // 调用API获取URL文件信息
+    console.log("开始URL验证和增强检测:", urlInput.value);
+
+    // 使用后端API进行URL验证和增强MIME检测
     const response = await validateUrlInfo(urlInput.value);
+
     if (response.success && response.data) {
-      // 转换后端返回的contentType字段为前端使用的mimetype字段，确保兼容性
+      const metadata = response.data;
+
+      // 构建兼容的文件信息对象
       const data = {
-        ...response.data,
-        mimetype: response.data.contentType || response.data.mimetype,
+        url: metadata.url,
+        filename: metadata.filename,
+        contentType: metadata.enhancedContentType || metadata.contentType,
+        size: metadata.size,
+        lastModified: metadata.lastModified,
+        corsSupported: metadata.corsSupported,
+        // 兼容性字段
+        mimetype: metadata.enhancedContentType || metadata.contentType,
+        // 增强检测信息
+        detectionMethod: metadata.detectionMethod,
+        detectionConfidence: metadata.detectionConfidence,
+        fileTypeLibraryUsed: metadata.fileTypeLibraryUsed,
       };
 
       fileInfo.value = data;
-      // 复位定制文件名，解码URL编码的文件名
-      if (fileInfo.value.filename) {
-        try {
-          customFilename.value = decodeURIComponent(fileInfo.value.filename);
-        } catch (e) {
-          console.warn("解码文件名失败:", e);
-          customFilename.value = fileInfo.value.filename || "";
-        }
+
+      // 显示检测信息
+      if (metadata.fileTypeLibraryUsed) {
+        console.log(`✅ 后端file-type检测成功: ${metadata.contentType} (置信度: ${metadata.detectionConfidence})`);
       } else {
-        customFilename.value = "";
+        console.log(`📡 传统检测: ${metadata.contentType}`);
       }
     } else {
-      urlError.value = t("file.urlAnalysisFailed");
+      throw new Error(response.message || "URL验证失败");
+    }
+
+    // 设置自定义文件名
+    if (fileInfo.value.filename) {
+      try {
+        customFilename.value = decodeURIComponent(fileInfo.value.filename);
+      } catch (e) {
+        console.warn("解码文件名失败:", e);
+        customFilename.value = fileInfo.value.filename || "";
+      }
+    } else {
+      customFilename.value = "";
     }
   } catch (error) {
-    console.error("URL解析失败:", error);
-    urlError.value = error.message || t("file.urlAnalysisFailed");
+    console.error("URL验证失败:", error);
+    urlError.value = error.message || t("file.messages.urlAnalysisFailed");
   } finally {
     isAnalyzing.value = false;
   }
@@ -751,7 +759,7 @@ const validateCustomLink = () => {
   // 验证格式：只允许字母、数字、连字符、下划线
   const slugRegex = /^[a-zA-Z0-9_-]+$/;
   if (!slugRegex.test(formData.slug)) {
-    slugError.value = t("file.invalidFormat");
+    slugError.value = t("file.messages.slugInvalid");
     return false;
   }
 
@@ -796,7 +804,7 @@ const submitUpload = async () => {
 
   // 验证可打开次数，确保是非负整数
   if (formData.max_views < 0) {
-    emit("upload-error", new Error(t("file.negativeMaxViews")));
+    emit("upload-error", new Error(t("file.messages.negativeMaxViews")));
     return;
   }
 
@@ -813,7 +821,7 @@ const submitUpload = async () => {
     const maxUrlLength = 100;
     const shortUrl = urlInput.value.length > maxUrlLength ? urlInput.value.substring(0, maxUrlLength) + "..." : urlInput.value;
 
-    formData.remark = `[url直链]${shortUrl}`;
+    formData.remark = `[${t("file.urlUpload.urlUpload")}]${shortUrl}`;
   }
 
   isUploading.value = true;
@@ -868,7 +876,7 @@ const presignedDirectUpload = async () => {
     // 1. 获取预签名URL
     currentStage.value = "initializing";
 
-    const presignedResponse = await getUrlUploadPresignedUrl({
+    const presignedResponse = await api.urlUpload.getUrlUploadPresignedUrl({
       url: urlInput.value,
       s3_config_id: formData.s3_config_id,
       filename: customFilename.value || fileInfo.value.filename,
@@ -881,7 +889,7 @@ const presignedDirectUpload = async () => {
     });
 
     if (!presignedResponse.success || !presignedResponse.data) {
-      throw new Error(t("file.getPresignedUrlFailed"));
+      throw new Error(t("file.messages.getPresignedUrlFailed"));
     }
 
     // 保存文件ID
@@ -889,7 +897,7 @@ const presignedDirectUpload = async () => {
 
     // 如果已经取消，则中止上传
     if (isCancelled.value) {
-      throw new Error(t("file.uploadCancelled"));
+      throw new Error(t("file.messages.uploadCancelled"));
     }
 
     uploadProgress.value = 10;
@@ -897,10 +905,10 @@ const presignedDirectUpload = async () => {
     // 2. 使用预签名URL上传文件
     currentStage.value = "uploading";
 
-    const uploadResult = await uploadFromUrlToS3({
+    const uploadResult = await api.urlUpload.uploadFromUrlToS3({
       url: urlInput.value,
       uploadUrl: presignedResponse.data.upload_url,
-      onProgress: (progress, loaded, total, phase) => {
+      onProgress: (progress, loaded, _total, phase) => {
         // 如果已取消，不再更新进度
         if (isCancelled.value) return;
 
@@ -937,13 +945,13 @@ const presignedDirectUpload = async () => {
 
     // 如果已经取消，则中止上传
     if (isCancelled.value) {
-      throw new Error(t("file.uploadCancelled"));
+      throw new Error(t("file.messages.uploadCancelled"));
     }
 
     // 3. 提交完成信息
     currentStage.value = "finalizing";
 
-    await commitUrlUpload({
+    await api.urlUpload.commitUrlUpload({
       file_id: fileId.value,
       etag: uploadResult.etag,
       size: uploadResult.size,
@@ -967,7 +975,7 @@ const presignedDirectUpload = async () => {
     // 如果已经获取了文件ID，尝试取消并清理文件记录
     if (fileId.value) {
       try {
-        await cancelUrlUpload(fileId.value);
+        await api.urlUpload.cancelUrlUpload(fileId.value);
         console.log(`已清理未完成的上传记录: ${fileId.value}`);
       } catch (cancelError) {
         console.error("清理未完成的上传记录失败:", cancelError);
@@ -1008,9 +1016,9 @@ const chunkedMultipartUpload = async () => {
     lastTime.value = Date.now();
 
     // 使用统一的URL内容获取函数，会先尝试直接获取，失败则自动使用代理
-    const blob = await fetchUrlContent({
+    const blob = await api.urlUpload.fetchUrlContent({
       url: urlInput.value,
-      onProgress: (progress, loaded, total, phase, phaseType) => {
+      onProgress: (progress, loaded, _total, _phase, phaseType) => {
         if (isCancelled.value) return;
 
         // 下载阶段占总进度的30%（从5%到35%），计算公式需要适应fetchUrlContent的进度范围变化(0-49%)
@@ -1049,7 +1057,7 @@ const chunkedMultipartUpload = async () => {
       if (activeXhr.value) {
         activeXhr.value = null;
       }
-      throw new Error(t("file.uploadCancelled"));
+      throw new Error(t("file.messages.uploadCancelled"));
     }
 
     // 步骤2: 准备分片信息 (35% -> 40%)
@@ -1060,7 +1068,7 @@ const chunkedMultipartUpload = async () => {
     // 计算分片大小和数量
     const partSize = 5 * 1024 * 1024; // 5MB分片大小
     const totalSize = blob.size;
-    const parts = createParts(blob, partSize);
+    const parts = api.urlUpload.createParts(blob, partSize);
     const partCount = parts.length;
 
     console.log(`文件大小为 ${totalSize} 字节，已分割为 ${partCount} 个分片，每个分片大小约 ${Math.round((partSize / 1024 / 1024) * 100) / 100} MB`);
@@ -1069,7 +1077,7 @@ const chunkedMultipartUpload = async () => {
 
     // 步骤3: 初始化分片上传 (40% -> 45%)
     currentStage.value = "initializing";
-    const initResult = await initializeMultipartUpload({
+    const initResult = await api.urlUpload.initializeMultipartUpload({
       url: urlInput.value,
       s3_config_id: formData.s3_config_id,
       filename: customFilename.value || fileInfo.value.filename,
@@ -1086,7 +1094,7 @@ const chunkedMultipartUpload = async () => {
     });
 
     if (!initResult.success || !initResult.data) {
-      throw new Error(t("file.initMultipartUploadFailed"));
+      throw new Error(t("file.messages.initMultipartUploadFailed"));
     }
 
     // 保存文件ID和上传ID
@@ -1095,7 +1103,7 @@ const chunkedMultipartUpload = async () => {
 
     // 如果已经取消，则终止上传
     if (isCancelled.value) {
-      await abortMultipartUpload(fileId.value, uploadId.value); // 传递 uploadId
+      await api.urlUpload.abortMultipartUpload(fileId.value, uploadId.value); // 传递 uploadId
       throw new Error(t("file.uploadCancelled"));
     }
 
@@ -1105,7 +1113,7 @@ const chunkedMultipartUpload = async () => {
     // 更新当前阶段为"上传中"
     currentStage.value = "uploading";
     // 创建分片上传实例
-    multipartUploader.value = new S3MultipartUploader({
+    multipartUploader.value = new api.urlUpload.S3MultipartUploader({
       maxConcurrentUploads: 3, // 最多同时上传3个分片
       onProgress: (progress, loaded, total) => {
         // 上传占总进度的50%，45%~95%之间，修改为45%~99%，让最后1%留给完成阶段
@@ -1149,7 +1157,7 @@ const chunkedMultipartUpload = async () => {
 
     // 如果已经取消，则终止上传
     if (isCancelled.value) {
-      await abortMultipartUpload(fileId.value, uploadId.value); // 传递 uploadId
+      await api.urlUpload.abortMultipartUpload(fileId.value, uploadId.value); // 传递 uploadId
       throw new Error(t("file.uploadCancelled"));
     }
 
@@ -1157,7 +1165,7 @@ const chunkedMultipartUpload = async () => {
     // 更新当前阶段为"完成中"
     currentStage.value = "finalizing";
 
-    await completeMultipartUpload({
+    await api.urlUpload.completeMultipartUpload({
       file_id: fileId.value,
       upload_id: uploadId.value, // 传递 uploadId
       parts: uploadedParts,
@@ -1176,7 +1184,7 @@ const chunkedMultipartUpload = async () => {
     // 如果上传已初始化但失败，尝试终止上传
     if (fileId.value && uploadId.value && !isCancelled.value) {
       try {
-        await abortMultipartUpload(fileId.value, uploadId.value); // 传递 uploadId
+        await api.urlUpload.abortMultipartUpload(fileId.value, uploadId.value); // 传递 uploadId
       } catch (abortError) {
         console.error("终止分片上传失败:", abortError);
       }
@@ -1184,7 +1192,7 @@ const chunkedMultipartUpload = async () => {
     // 如果只有文件ID但没有uploadId（或已经尝试终止分片上传失败），尝试取消并清理文件记录
     else if (fileId.value && !uploadId.value) {
       try {
-        await cancelUrlUpload(fileId.value);
+        await api.urlUpload.cancelUrlUpload(fileId.value);
         console.log(`已清理未完成的上传记录: ${fileId.value}`);
       } catch (cancelError) {
         console.error("清理未完成的上传记录失败:", cancelError);
@@ -1228,7 +1236,7 @@ const cancelUpload = async () => {
   if (fileId.value && uploadId.value) {
     try {
       if (uploadMethod.value === "multipart") {
-        await abortMultipartUpload(fileId.value, uploadId.value);
+        await api.urlUpload.abortMultipartUpload(fileId.value, uploadId.value);
       }
       // 预签名直传方式不需要额外的取消操作，文件会在提交阶段自动被覆盖
     } catch (error) {
@@ -1238,7 +1246,7 @@ const cancelUpload = async () => {
   // 如果只有文件ID但没有uploadId（预签名直传方式），尝试清理文件记录
   else if (fileId.value && !uploadId.value) {
     try {
-      await cancelUrlUpload(fileId.value);
+      await api.urlUpload.cancelUrlUpload(fileId.value);
       console.log(`已清理未完成的上传记录: ${fileId.value}`);
     } catch (cancelError) {
       console.error("清理未完成的上传记录失败:", cancelError);
@@ -1292,14 +1300,14 @@ const resetForm = () => {
 
 .progress-stripes {
   background-image: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.15) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(255, 255, 255, 0.15) 75%,
-    transparent 75%,
-    transparent
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
   );
   background-size: 1rem 1rem;
 }

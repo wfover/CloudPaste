@@ -2,9 +2,8 @@
  * S3存储配置路由
  */
 import { Hono } from "hono";
-import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { validateAdminToken } from "../services/adminService.js";
-import { checkAndDeleteExpiredApiKey } from "../services/apiKeyService.js";
+import { baseAuthMiddleware, requireAdminMiddleware, createFlexiblePermissionMiddleware } from "../middlewares/permissionMiddleware.js";
+import { PermissionUtils, PermissionType } from "../utils/permissionUtils.js";
 import {
   getS3ConfigsByAdmin,
   getPublicS3Configs,
@@ -18,7 +17,7 @@ import {
   getS3ConfigsWithUsage,
 } from "../services/s3ConfigService.js";
 import { DbTables, ApiStatus } from "../constants/index.js";
-import { createErrorResponse, getLocalTimeString } from "../utils/common.js";
+import { createErrorResponse } from "../utils/common.js";
 import { HTTPException } from "hono/http-exception";
 import { decryptValue } from "../utils/crypto.js";
 import * as fs from "fs";
@@ -28,70 +27,20 @@ import { createS3Client } from "../utils/s3Utils.js";
 
 const s3ConfigRoutes = new Hono();
 
+// 创建文件权限中间件（管理员或API密钥文件权限）
+const requireFilePermissionMiddleware = createFlexiblePermissionMiddleware({
+  permissions: [PermissionType.FILE],
+  allowAdmin: true,
+});
+
 // 获取S3配置列表（管理员权限或API密钥文件权限）
-s3ConfigRoutes.get("/api/s3-configs", async (c) => {
+s3ConfigRoutes.get("/api/s3-configs", baseAuthMiddleware, requireFilePermissionMiddleware, async (c) => {
   const db = c.env.DB;
-
-  // 获取授权信息
-  const authHeader = c.req.header("Authorization");
-  let isAdmin = false;
-  let hasFilePermission = false;
-  let adminId = null;
-
-  // 检查授权类型
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    // 管理员令牌认证
-    try {
-      const token = authHeader.substring(7);
-      adminId = await validateAdminToken(db, token);
-      if (adminId) {
-        isAdmin = true;
-      }
-    } catch (error) {
-      console.error("验证管理员令牌出错:", error);
-    }
-  } else if (authHeader && authHeader.startsWith("ApiKey ")) {
-    // API密钥认证
-    try {
-      const apiKey = authHeader.substring(7);
-      // 查询API密钥和权限
-      const keyRecord = await db
-        .prepare(
-          `SELECT id, name, file_permission, expires_at 
-           FROM ${DbTables.API_KEYS} 
-           WHERE key = ?`
-        )
-        .bind(apiKey)
-        .first();
-
-      if (keyRecord && keyRecord.file_permission === 1) {
-        // 检查是否过期
-        if (!(await checkAndDeleteExpiredApiKey(db, keyRecord))) {
-          hasFilePermission = true;
-
-          // 更新最后使用时间
-          await db
-            .prepare(
-              `UPDATE ${DbTables.API_KEYS}
-               SET last_used = ?
-               WHERE id = ?`
-            )
-            .bind(getLocalTimeString(), keyRecord.id)
-            .run();
-        }
-      }
-    } catch (error) {
-      console.error("验证API密钥出错:", error);
-    }
-  }
-
-  // 如果既不是管理员也没有文件权限，返回未授权错误
-  if (!isAdmin && !hasFilePermission) {
-    return c.json(createErrorResponse(ApiStatus.UNAUTHORIZED, "未授权访问S3配置"), ApiStatus.UNAUTHORIZED);
-  }
 
   try {
     let configs;
+    const isAdmin = PermissionUtils.isAdmin(c);
+    const adminId = PermissionUtils.getUserId(c);
 
     if (isAdmin) {
       // 管理员可以看到所有自己的配置
@@ -114,60 +63,14 @@ s3ConfigRoutes.get("/api/s3-configs", async (c) => {
 });
 
 // 获取单个S3配置详情
-s3ConfigRoutes.get("/api/s3-configs/:id", async (c) => {
+s3ConfigRoutes.get("/api/s3-configs/:id", baseAuthMiddleware, requireFilePermissionMiddleware, async (c) => {
   const db = c.env.DB;
   const { id } = c.req.param();
 
-  // 获取授权信息
-  const authHeader = c.req.header("Authorization");
-  let isAdmin = false;
-  let hasFilePermission = false;
-  let adminId = null;
-
-  // 检查授权类型
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    // 管理员令牌认证
-    try {
-      const token = authHeader.substring(7);
-      adminId = await validateAdminToken(db, token);
-      if (adminId) {
-        isAdmin = true;
-      }
-    } catch (error) {
-      console.error("验证管理员令牌出错:", error);
-    }
-  } else if (authHeader && authHeader.startsWith("ApiKey ")) {
-    // API密钥认证
-    try {
-      const apiKey = authHeader.substring(7);
-      // 查询API密钥和权限
-      const keyRecord = await db
-        .prepare(
-          `SELECT id, name, file_permission, expires_at 
-           FROM ${DbTables.API_KEYS} 
-           WHERE key = ?`
-        )
-        .bind(apiKey)
-        .first();
-
-      if (keyRecord && keyRecord.file_permission === 1) {
-        // 检查是否过期
-        if (!(await checkAndDeleteExpiredApiKey(db, keyRecord))) {
-          hasFilePermission = true;
-        }
-      }
-    } catch (error) {
-      console.error("验证API密钥出错:", error);
-    }
-  }
-
-  // 如果既不是管理员也没有文件权限，返回未授权错误
-  if (!isAdmin && !hasFilePermission) {
-    return c.json(createErrorResponse(ApiStatus.UNAUTHORIZED, "未授权访问S3配置"), ApiStatus.UNAUTHORIZED);
-  }
-
   try {
     let config;
+    const isAdmin = PermissionUtils.isAdmin(c);
+    const adminId = PermissionUtils.getUserId(c);
 
     if (isAdmin) {
       // 管理员查询
@@ -190,9 +93,9 @@ s3ConfigRoutes.get("/api/s3-configs/:id", async (c) => {
 });
 
 // 创建S3配置（管理员权限）
-s3ConfigRoutes.post("/api/s3-configs", authMiddleware, async (c) => {
+s3ConfigRoutes.post("/api/s3-configs", baseAuthMiddleware, requireAdminMiddleware, async (c) => {
   const db = c.env.DB;
-  const adminId = c.get("adminId");
+  const adminId = PermissionUtils.getUserId(c);
   const encryptionSecret = c.env.ENCRYPTION_SECRET || "default-encryption-key";
 
   try {
@@ -213,9 +116,9 @@ s3ConfigRoutes.post("/api/s3-configs", authMiddleware, async (c) => {
 });
 
 // 更新S3配置（管理员权限）
-s3ConfigRoutes.put("/api/s3-configs/:id", authMiddleware, async (c) => {
+s3ConfigRoutes.put("/api/s3-configs/:id", baseAuthMiddleware, requireAdminMiddleware, async (c) => {
   const db = c.env.DB;
-  const adminId = c.get("adminId");
+  const adminId = PermissionUtils.getUserId(c);
   const { id } = c.req.param();
   const encryptionSecret = c.env.ENCRYPTION_SECRET || "default-encryption-key";
 
@@ -235,9 +138,9 @@ s3ConfigRoutes.put("/api/s3-configs/:id", authMiddleware, async (c) => {
 });
 
 // 删除S3配置（管理员权限）
-s3ConfigRoutes.delete("/api/s3-configs/:id", authMiddleware, async (c) => {
+s3ConfigRoutes.delete("/api/s3-configs/:id", baseAuthMiddleware, requireAdminMiddleware, async (c) => {
   const db = c.env.DB;
-  const adminId = c.get("adminId");
+  const adminId = PermissionUtils.getUserId(c);
   const { id } = c.req.param();
 
   try {
@@ -255,9 +158,9 @@ s3ConfigRoutes.delete("/api/s3-configs/:id", authMiddleware, async (c) => {
 });
 
 // 设置默认S3配置（管理员权限）
-s3ConfigRoutes.put("/api/s3-configs/:id/set-default", authMiddleware, async (c) => {
+s3ConfigRoutes.put("/api/s3-configs/:id/set-default", baseAuthMiddleware, requireAdminMiddleware, async (c) => {
   const db = c.env.DB;
-  const adminId = c.get("adminId");
+  const adminId = PermissionUtils.getUserId(c);
   const { id } = c.req.param();
 
   try {
@@ -275,9 +178,9 @@ s3ConfigRoutes.put("/api/s3-configs/:id/set-default", authMiddleware, async (c) 
 });
 
 // 测试S3配置连接（管理员权限）
-s3ConfigRoutes.post("/api/s3-configs/:id/test", authMiddleware, async (c) => {
+s3ConfigRoutes.post("/api/s3-configs/:id/test", baseAuthMiddleware, requireAdminMiddleware, async (c) => {
   const db = c.env.DB;
-  const adminId = c.get("adminId");
+  const adminId = PermissionUtils.getUserId(c);
   const { id } = c.req.param();
   const encryptionSecret = c.env.ENCRYPTION_SECRET || "default-encryption-key";
   const requestOrigin = c.req.header("origin");
@@ -297,19 +200,19 @@ s3ConfigRoutes.post("/api/s3-configs/:id/test", authMiddleware, async (c) => {
   } catch (error) {
     console.error("测试S3配置错误:", error);
     return c.json(
-      {
-        code: ApiStatus.INTERNAL_ERROR,
-        message: error.message || "测试S3配置失败",
-        data: {
-          success: false,
-          result: {
-            error: error.message,
-            stack: process.env.NODE_ENV === "development" ? error.stack : null,
+        {
+          code: ApiStatus.INTERNAL_ERROR,
+          message: error.message || "测试S3配置失败",
+          data: {
+            success: false,
+            result: {
+              error: error.message,
+              stack: process.env.NODE_ENV === "development" ? error.stack : null,
+            },
           },
+          success: false,
         },
-        success: false,
-      },
-      ApiStatus.INTERNAL_ERROR
+        ApiStatus.INTERNAL_ERROR
     );
   }
 });

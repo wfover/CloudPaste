@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
-import { getDashboardStats } from "../../api/adminService";
+import { api } from "../../api";
 import { useI18n } from "vue-i18n";
 // 引入Chart.js相关组件
 import { Bar, Line } from "vue-chartjs";
@@ -41,6 +41,9 @@ const error = ref(null);
 // 图表显示类型切换
 const chartType = ref("bar"); // 'bar' 或 'line'
 
+// 导入统一的时间处理工具
+import { formatCurrentTime } from "../../utils/timeUtils.js";
+
 // 图表日期标签
 const dateLabels = computed(() => {
   // 获取过去7天的日期
@@ -48,7 +51,8 @@ const dateLabels = computed(() => {
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    dates.push(date.toLocaleDateString("zh-CN", { month: "short", day: "numeric" }));
+    // 使用 Intl.DateTimeFormat 确保正确的本地化
+    dates.push(new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric" }).format(date));
   }
   return dates;
 });
@@ -59,7 +63,7 @@ const chartData = computed(() => {
     labels: dateLabels.value,
     datasets: [
       {
-        label: t("dashboard.totalPastes") || "文本分享",
+        label: t("dashboard.totalPastes"),
         backgroundColor: props.darkMode ? "rgba(59, 130, 246, 0.7)" : "rgba(37, 99, 235, 0.7)",
         borderColor: props.darkMode ? "rgba(59, 130, 246, 1)" : "rgba(37, 99, 235, 1)",
         borderWidth: 1,
@@ -67,7 +71,7 @@ const chartData = computed(() => {
         borderRadius: 4,
       },
       {
-        label: t("dashboard.totalFiles") || "文件上传",
+        label: t("dashboard.totalFiles"),
         backgroundColor: props.darkMode ? "rgba(16, 185, 129, 0.7)" : "rgba(5, 150, 105, 0.7)",
         borderColor: props.darkMode ? "rgba(16, 185, 129, 1)" : "rgba(5, 150, 105, 1)",
         borderWidth: 1,
@@ -161,12 +165,12 @@ const currentBucketData = computed(() => {
   // 返回选中的存储桶数据
   const bucket = statsData.value.s3Buckets.find((b) => b.id === selectedBucketId.value);
   return (
-    bucket || {
-      name: t("dashboard.allBuckets"),
-      usedStorage: statsData.value.totalStorageUsed,
-      totalStorage: statsData.value.s3Buckets.reduce((total, bucket) => total + bucket.totalStorage, 0),
-      usagePercent: calculateTotalUsagePercent(),
-    }
+      bucket || {
+        name: t("dashboard.allBuckets"),
+        usedStorage: statsData.value.totalStorageUsed,
+        totalStorage: statsData.value.s3Buckets.reduce((total, bucket) => total + bucket.totalStorage, 0),
+        usagePercent: calculateTotalUsagePercent(),
+      }
   );
 });
 
@@ -218,13 +222,16 @@ const getOtherProvidersPercent = () => {
 
 // 格式化存储大小
 const formatBytes = (bytes, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0) return `0 ${t("dashboard.storageUnits.bytes")}`;
 
   const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
+  const sizeKeys = ["bytes", "kb", "mb", "gb", "tb"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
+  const sizeKey = sizeKeys[i] || "bytes";
+  const sizeUnit = t(`dashboard.storageUnits.${sizeKey}`);
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizeUnit;
 };
 
 // 切换选中的存储桶
@@ -266,17 +273,17 @@ const fetchDashboardStats = async () => {
 
   try {
     // 实际API调用
-    const response = await getDashboardStats();
+    const response = await api.admin.getDashboardStats();
     if (response.success && response.data) {
       statsData.value = response.data;
       // 重置选中的存储桶
       selectedBucketId.value = null;
     } else {
-      throw new Error(response.error || "获取数据失败");
+      throw new Error(response.error || t("dashboard.fetchError"));
     }
   } catch (err) {
     console.error("获取控制面板数据失败:", err);
-    error.value = t("dashboard.fetchError") || "获取数据失败，请稍后重试";
+    error.value = t("dashboard.fetchError");
   } finally {
     isLoading.value = false;
   }
@@ -284,12 +291,12 @@ const fetchDashboardStats = async () => {
 
 // 监听暗色模式变化
 watch(
-  () => props.darkMode,
-  () => {
-    // 当暗色模式变化时，通过重新计算chartData和chartOptions来更新图表
-    chartData.value; // 触发重新计算
-    chartOptions.value; // 触发重新计算
-  }
+    () => props.darkMode,
+    () => {
+      // 当暗色模式变化时，通过重新计算chartData和chartOptions来更新图表
+      chartData.value; // 触发重新计算
+      chartOptions.value; // 触发重新计算
+    }
 );
 
 // 监听语言变化事件
@@ -314,22 +321,22 @@ onBeforeUnmount(() => {
     <!-- 标题和刷新按钮 -->
     <div class="flex justify-between items-center mb-4 md:mb-6">
       <h2 class="text-xl font-bold" :class="darkMode ? 'text-white' : 'text-gray-800'">
-        {{ t("dashboard.systemOverview") || "系统概览" }}
+        {{ t("dashboard.systemOverview") }}
       </h2>
       <button
-        @click="fetchDashboardStats"
-        class="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-        :class="[darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300']"
+          @click="fetchDashboardStats"
+          class="flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+          :class="[darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300']"
       >
         <svg class="w-4 h-4 mr-1.5" :class="isLoading ? 'animate-spin' : ''" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        {{ isLoading ? t("dashboard.loading") || "加载中..." : t("dashboard.refresh") || "刷新" }}
+        {{ isLoading ? t("dashboard.refreshing") : t("dashboard.refresh") }}
       </button>
     </div>
 
@@ -345,7 +352,7 @@ onBeforeUnmount(() => {
         <div class="flex justify-between">
           <div>
             <p class="text-sm font-medium" :class="darkMode ? 'text-gray-300' : 'text-gray-500'">
-              {{ t("dashboard.totalPastes") || "文本分享" }}
+              {{ t("dashboard.totalPastes") }}
             </p>
             <p class="mt-1 text-2xl font-semibold" :class="darkMode ? 'text-white' : 'text-gray-800'">
               {{ statsData.totalPastes }}
@@ -354,10 +361,10 @@ onBeforeUnmount(() => {
           <div class="h-12 w-12 rounded-lg flex items-center justify-center" :class="darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
           </div>
@@ -369,7 +376,7 @@ onBeforeUnmount(() => {
         <div class="flex justify-between">
           <div>
             <p class="text-sm font-medium" :class="darkMode ? 'text-gray-300' : 'text-gray-500'">
-              {{ t("dashboard.totalFiles") || "文件上传" }}
+              {{ t("dashboard.totalFiles") }}
             </p>
             <p class="mt-1 text-2xl font-semibold" :class="darkMode ? 'text-white' : 'text-gray-800'">
               {{ statsData.totalFiles }}
@@ -388,7 +395,7 @@ onBeforeUnmount(() => {
         <div class="flex justify-between">
           <div>
             <p class="text-sm font-medium" :class="darkMode ? 'text-gray-300' : 'text-gray-500'">
-              {{ t("dashboard.totalApiKeys") || "API密钥" }}
+              {{ t("dashboard.totalApiKeys") }}
             </p>
             <p class="mt-1 text-2xl font-semibold" :class="darkMode ? 'text-white' : 'text-gray-800'">
               {{ statsData.totalApiKeys }}
@@ -397,10 +404,10 @@ onBeforeUnmount(() => {
           <div class="h-12 w-12 rounded-lg flex items-center justify-center" :class="darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
               />
             </svg>
           </div>
@@ -412,7 +419,7 @@ onBeforeUnmount(() => {
         <div class="flex justify-between">
           <div>
             <p class="text-sm font-medium" :class="darkMode ? 'text-gray-300' : 'text-gray-500'">
-              {{ t("dashboard.totalS3Configs") || "存储配置" }}
+              {{ t("dashboard.totalS3Configs") }}
             </p>
             <p class="mt-1 text-2xl font-semibold" :class="darkMode ? 'text-white' : 'text-gray-800'">
               {{ statsData.totalS3Configs }}
@@ -439,9 +446,9 @@ onBeforeUnmount(() => {
           <!-- 存储桶选择器 -->
           <div class="relative">
             <button
-              @click="$refs.bucketDropdown.classList.toggle('hidden')"
-              class="px-2 py-1 text-xs rounded flex items-center"
-              :class="darkMode ? 'bg-gray-600 text-gray-200 hover:bg-gray-500' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                @click="$refs.bucketDropdown.classList.toggle('hidden')"
+                class="px-2 py-1 text-xs rounded flex items-center"
+                :class="darkMode ? 'bg-gray-600 text-gray-200 hover:bg-gray-500' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
             >
               <span>{{ currentBucketData.name }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -451,16 +458,16 @@ onBeforeUnmount(() => {
 
             <!-- 存储桶下拉菜单 -->
             <div
-              ref="bucketDropdown"
-              class="hidden absolute right-0 mt-1 w-40 rounded-md shadow-lg z-10"
-              :class="darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'"
+                ref="bucketDropdown"
+                class="hidden absolute right-0 mt-1 w-40 rounded-md shadow-lg z-10"
+                :class="darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'"
             >
               <div class="py-1">
                 <a
-                  href="#"
-                  @click.prevent="selectBucket(null)"
-                  class="block px-4 py-2 text-xs"
-                  :class="[
+                    href="#"
+                    @click.prevent="selectBucket(null)"
+                    class="block px-4 py-2 text-xs"
+                    :class="[
                     !selectedBucketId ? (darkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900') : '',
                     darkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
                   ]"
@@ -470,12 +477,12 @@ onBeforeUnmount(() => {
 
                 <!-- 各个存储桶选项 -->
                 <a
-                  v-for="bucket in statsData.s3Buckets"
-                  :key="bucket.id"
-                  href="#"
-                  @click.prevent="selectBucket(bucket.id)"
-                  class="block px-4 py-2 text-xs"
-                  :class="[
+                    v-for="bucket in statsData.s3Buckets"
+                    :key="bucket.id"
+                    href="#"
+                    @click.prevent="selectBucket(bucket.id)"
+                    class="block px-4 py-2 text-xs"
+                    :class="[
                     selectedBucketId === bucket.id ? (darkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900') : '',
                     darkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
                   ]"
@@ -496,9 +503,9 @@ onBeforeUnmount(() => {
 
         <div class="w-full bg-gray-200 rounded-full h-2.5" :class="darkMode ? 'bg-gray-600' : 'bg-gray-200'">
           <div
-            class="h-2.5 rounded-full transition-all duration-500"
-            :class="[currentBucketData.usagePercent > 80 ? 'bg-red-500' : currentBucketData.usagePercent > 60 ? 'bg-orange-500' : 'bg-primary-500']"
-            :style="{ width: `${currentBucketData.usagePercent}%` }"
+              class="h-2.5 rounded-full transition-all duration-500"
+              :class="[currentBucketData.usagePercent > 80 ? 'bg-red-500' : currentBucketData.usagePercent > 60 ? 'bg-orange-500' : 'bg-primary-500']"
+              :style="{ width: `${currentBucketData.usagePercent}%` }"
           ></div>
         </div>
       </div>
@@ -543,25 +550,25 @@ onBeforeUnmount(() => {
       <div class="p-3 rounded-lg shadow transition-shadow hover:shadow-md" :class="darkMode ? 'bg-gray-700' : 'bg-white'">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-base font-semibold" :class="darkMode ? 'text-white' : 'text-gray-800'">
-            {{ t("dashboard.weeklyActivity") || "过去7天活动" }}
+            {{ t("dashboard.weeklyActivity") }}
           </h3>
 
           <div class="flex items-center space-x-2">
             <!-- 图表类型切换按钮 -->
             <button
-              @click="toggleChartType"
-              class="px-2 py-1 rounded-md text-xs transition-colors flex items-center"
-              :class="darkMode ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'"
+                @click="toggleChartType"
+                class="px-2 py-1 rounded-md text-xs transition-colors flex items-center"
+                :class="darkMode ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'"
             >
               <svg v-if="chartType === 'bar'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
               </svg>
               <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 />
               </svg>
               {{ chartType === "bar" ? t("dashboard.switchToLineChart") : t("dashboard.switchToBarChart") }}
@@ -576,10 +583,10 @@ onBeforeUnmount(() => {
               <div class="w-7 h-7 rounded-full flex items-center justify-center mr-2" :class="darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
               </div>
@@ -599,10 +606,10 @@ onBeforeUnmount(() => {
               <div class="w-7 h-7 rounded-full flex items-center justify-center mr-2" :class="darkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                   />
                 </svg>
               </div>
@@ -622,10 +629,10 @@ onBeforeUnmount(() => {
               <div class="w-7 h-7 rounded-full flex items-center justify-center mr-2" :class="darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                   />
                 </svg>
               </div>
@@ -674,10 +681,10 @@ onBeforeUnmount(() => {
           <div class="w-6 h-6 rounded-full flex items-center justify-center mr-2" :class="darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
               />
             </svg>
           </div>
@@ -694,10 +701,10 @@ onBeforeUnmount(() => {
           <div class="w-6 h-6 rounded-full flex items-center justify-center mr-2" :class="darkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
               />
             </svg>
           </div>
@@ -721,7 +728,7 @@ onBeforeUnmount(() => {
           </h3>
         </div>
         <p class="text-sm ml-8" :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
-          {{ new Date().toLocaleString() }}
+          {{ formatCurrentTime() }}
         </p>
       </div>
     </div>
