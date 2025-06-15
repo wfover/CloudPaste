@@ -2,10 +2,13 @@
   <div class="file-preview-container">
     <!-- 文件预览区域 -->
     <div class="file-preview mb-6 p-4 rounded-lg" :class="darkMode ? 'bg-gray-800/50' : 'bg-white'">
-      <!-- 操作按钮 -->
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-medium flex-1 min-w-0 truncate mr-2" :class="darkMode ? 'text-gray-200' : 'text-gray-700'" :title="file.name">{{ file.name }}</h3>
-        <div class="flex space-x-2">
+      <!-- 文件标题和操作按钮 -->
+      <div class="mb-4">
+        <h3 class="text-lg font-medium mb-3" :class="darkMode ? 'text-gray-200' : 'text-gray-700'" :title="file.name">
+          {{ file.name }}
+        </h3>
+        <div class="flex flex-wrap gap-2">
+          <!-- 下载按钮 -->
           <button
               @click="handleDownload"
               class="inline-flex items-center px-3 py-1.5 rounded-md transition-colors text-sm font-medium"
@@ -14,7 +17,34 @@
             <svg class="w-4 h-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            <span>下载文件</span>
+            <span>{{ t("mount.filePreview.downloadFile") }}</span>
+          </button>
+
+          <!-- S3直链预览按钮 -->
+          <button
+              @click="handleS3DirectPreview"
+              class="inline-flex items-center px-3 py-1.5 rounded-md transition-colors text-sm font-medium"
+              :class="darkMode ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-600 text-white'"
+              :disabled="isGeneratingPreview"
+          >
+            <svg v-if="!isGeneratingPreview" class="w-4 h-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+            <svg v-else class="animate-spin w-4 h-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span>{{ isGeneratingPreview ? t("mount.filePreview.generating") : t("mount.filePreview.directPreview") }}</span>
           </button>
         </div>
       </div>
@@ -22,16 +52,16 @@
       <!-- 文件信息 -->
       <div class="file-info grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-3 rounded-lg bg-opacity-50" :class="darkMode ? 'bg-gray-700/50' : 'bg-gray-100'">
         <div class="file-info-item flex items-center">
-          <span class="font-medium mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">文件大小:</span>
+          <span class="font-medium mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("mount.filePreview.fileSize") }}</span>
           <span :class="darkMode ? 'text-gray-400' : 'text-gray-600'">{{ formatFileSize(file.size) }}</span>
         </div>
         <div class="file-info-item flex items-center">
-          <span class="font-medium mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">修改时间:</span>
+          <span class="font-medium mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("mount.filePreview.modifiedTime") }}</span>
           <span :class="darkMode ? 'text-gray-400' : 'text-gray-600'">{{ formatDate(file.modified) }}</span>
         </div>
         <div class="file-info-item flex items-center">
-          <span class="font-medium mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">文件类型:</span>
-          <span :class="darkMode ? 'text-gray-400' : 'text-gray-600'">{{ file.contentType || "未知" }}</span>
+          <span class="font-medium mr-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("mount.filePreview.fileType") }}</span>
+          <span :class="darkMode ? 'text-gray-400' : 'text-gray-600'">{{ file.contentType || t("mount.filePreview.unknown") }}</span>
         </div>
       </div>
 
@@ -54,7 +84,7 @@
                     aria-expanded="true"
                     aria-haspopup="true"
                 >
-                  {{ isEditMode ? "编辑模式" : "预览模式" }}
+                  {{ isEditMode ? t("mount.filePreview.editMode") : t("mount.filePreview.previewMode") }}
                   <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path
                         fill-rule="evenodd"
@@ -89,7 +119,7 @@
                       role="menuitem"
                       tabindex="-1"
                   >
-                    预览模式
+                    {{ t("mount.filePreview.previewMode") }}
                   </button>
                   <button
                       @click="selectMode('edit')"
@@ -106,7 +136,7 @@
                       role="menuitem"
                       tabindex="-1"
                   >
-                    编辑模式
+                    {{ t("mount.filePreview.editMode") }}
                   </button>
                 </div>
               </div>
@@ -132,7 +162,7 @@
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              <span>{{ isSaving ? "保存中..." : "保存" }}</span>
+              <span>{{ isSaving ? t("mount.filePreview.saving") : t("mount.filePreview.save") }}</span>
             </button>
             <button
                 @click="cancelEdit"
@@ -143,7 +173,7 @@
               <svg class="w-4 h-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span>取消</span>
+              <span>{{ t("mount.filePreview.cancel") }}</span>
             </button>
           </div>
         </div>
@@ -175,7 +205,7 @@
         <div v-else-if="isVideo" class="video-preview p-4">
           <video v-if="authenticatedPreviewUrl" controls class="max-w-full mx-auto max-h-[500px]" @loadeddata="handleContentLoaded" @error="handleContentError">
             <source :src="authenticatedPreviewUrl" :type="file.contentType" />
-            您的浏览器不支持视频标签
+            {{ t("mount.filePreview.browserNotSupport") }} {{ t("mount.filePreview.videoTag") }}
           </video>
           <div v-else class="loading-indicator text-center py-8">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 mx-auto" :class="darkMode ? 'border-primary-500' : 'border-primary-600'"></div>
@@ -186,7 +216,7 @@
         <div v-else-if="isAudio" class="audio-preview p-4">
           <audio v-if="authenticatedPreviewUrl" controls class="w-full" @loadeddata="handleContentLoaded" @error="handleContentError">
             <source :src="authenticatedPreviewUrl" :type="file.contentType" />
-            您的浏览器不支持音频标签
+            {{ t("mount.filePreview.browserNotSupport") }} {{ t("mount.filePreview.audioTag") }}
           </audio>
           <div v-else class="loading-indicator text-center py-8">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 mx-auto" :class="darkMode ? 'border-primary-500' : 'border-primary-600'"></div>
@@ -213,7 +243,7 @@
           <!-- Office预览头部控制栏 -->
           <div class="sticky top-0 z-20 flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {{ isWordDoc ? "Word文档预览" : isExcel ? "Excel表格预览" : "PowerPoint演示文稿预览" }}
+              {{ isWordDoc ? t("mount.filePreview.wordPreview") : isExcel ? t("mount.filePreview.excelPreview") : t("mount.filePreview.powerpointPreview") }}
             </span>
             <div class="flex items-center space-x-2">
               <button
@@ -231,13 +261,13 @@
                 <svg v-else class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                <span>{{ isOfficeFullscreen ? "退出全屏" : "全屏" }}</span>
+                <span>{{ isOfficeFullscreen ? t("mount.filePreview.exitFullscreen") : t("mount.filePreview.fullscreen") }}</span>
               </button>
               <button
                   @click="toggleOfficePreviewService"
                   class="text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-600 transition-colors"
               >
-                {{ useGoogleDocsPreview ? "使用Microsoft预览" : "使用Google预览" }}
+                {{ useGoogleDocsPreview ? t("mount.filePreview.useMicrosoftPreview") : t("mount.filePreview.useGooglePreview") }}
               </button>
             </div>
           </div>
@@ -245,7 +275,7 @@
           <!-- 加载状态 -->
           <div v-if="officePreviewLoading" class="flex flex-col items-center justify-center h-full">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 mb-4" :class="darkMode ? 'border-primary-500' : 'border-primary-600'"></div>
-            <p class="text-sm" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">正在加载Office预览...</p>
+            <p class="text-sm" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("mount.filePreview.loadingPreview") }}</p>
           </div>
 
           <!-- 错误状态 -->
@@ -271,7 +301,7 @@
                 class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
                 :class="darkMode ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white'"
             >
-              重试
+              {{ t("mount.filePreview.retry") }}
             </button>
           </div>
 
@@ -317,7 +347,7 @@
           <div v-else>
             <!-- 添加HTML预览的控制栏 -->
             <div class="sticky top-0 z-20 flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">HTML预览</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t("mount.filePreview.htmlPreview") }}</span>
               <div class="flex items-center">
                 <button
                     @click="toggleHtmlFullscreen"
@@ -334,7 +364,7 @@
                   <svg v-else class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  <span>{{ isHtmlFullscreen ? "退出全屏" : "全屏" }}</span>
+                  <span>{{ isHtmlFullscreen ? t("mount.filePreview.exitFullscreen") : t("mount.filePreview.fullscreen") }}</span>
                 </button>
               </div>
             </div>
@@ -358,13 +388,13 @@
           <div v-else>
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm font-medium" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
-                语言: {{ codeLanguage || "自动检测" }}
+                {{ t("mount.filePreview.language") }} {{ codeLanguage || t("mount.filePreview.autoDetect") }}
                 <span
                     v-if="fileTypeInfo.value && fileTypeInfo.value.category === 'config'"
                     class="ml-2 px-2 py-0.5 text-xs rounded-full"
                     :class="darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'"
                 >
-                  配置文件
+                  {{ t("mount.filePreview.configFile") }}
                 </span>
               </span>
             </div>
@@ -374,7 +404,10 @@
 
         <!-- 普通文本预览 -->
         <div v-else-if="isText" class="text-preview p-4 overflow-auto max-h-[500px]">
-          <div v-if="isEditMode" class="editor-container h-[500px] border" :class="darkMode ? 'border-gray-700' : 'border-gray-300'">
+          <div v-if="isTextLoading || (!textContent && !loadError)" class="loading-indicator text-center py-8">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 mx-auto" :class="darkMode ? 'border-primary-500' : 'border-primary-600'"></div>
+          </div>
+          <div v-else-if="isEditMode" class="editor-container h-[500px] border" :class="darkMode ? 'border-gray-700' : 'border-gray-300'">
             <textarea
                 v-model="editContent"
                 class="w-full h-full p-4 font-mono text-sm focus:outline-none resize-none"
@@ -402,8 +435,8 @@
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <p class="text-lg font-medium mb-2" :class="darkMode ? 'text-red-300' : 'text-red-700'">加载文件预览失败</p>
-          <p class="text-sm" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">请尝试重新加载或下载文件查看</p>
+          <p class="text-lg font-medium mb-2" :class="darkMode ? 'text-red-300' : 'text-red-700'">{{ t("mount.filePreview.previewError") }}</p>
+          <p class="text-sm" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ t("mount.filePreview.retryLoad") }}</p>
         </div>
 
         <!-- 不支持预览的文件类型 -->
@@ -423,8 +456,8 @@
                 d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
             />
           </svg>
-          <p class="text-lg font-medium mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">文件无法预览</p>
-          <p class="text-sm" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">当前文件类型不支持在线预览，请点击下载按钮下载查看</p>
+          <p class="text-lg font-medium mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">{{ t("mount.filePreview.cannotPreview") }}</p>
+          <p class="text-sm" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ t("mount.filePreview.downloadToView") }}</p>
         </div>
       </div>
     </div>
@@ -433,14 +466,48 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { api } from "../../api";
+
+const { t } = useI18n();
 import { getAuthHeaders, createAuthenticatedPreviewUrl } from "../../utils/fileUtils";
 import { getMimeTypeGroupByFileDetails, getFileExtension, MIME_GROUPS, formatFileSize as formatFileSizeUtil } from "../../utils/mimeTypeUtils";
 import hljs from "highlight.js";
 import "highlight.js/styles/github.css"; // 亮色模式默认样式
 import "highlight.js/styles/github-dark.css"; // 暗色模式样式
-import Vditor from "vditor";
-import "vditor/dist/index.css";
+// 懒加载Vditor和CSS
+let VditorClass = null;
+let vditorCSSLoaded = false;
+
+const loadVditor = async () => {
+  if (!VditorClass) {
+    await loadVditorCSS();
+
+    // 从assets目录加载Vditor
+    const script = document.createElement("script");
+    script.src = "/assets/vditor/dist/index.min.js";
+
+    return new Promise((resolve, reject) => {
+      script.onload = () => {
+        VditorClass = window.Vditor;
+        resolve(VditorClass);
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+  return VditorClass;
+};
+
+const loadVditorCSS = async () => {
+  if (!vditorCSSLoaded) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/assets/vditor/dist/index.css";
+    document.head.appendChild(link);
+    vditorCSSLoaded = true;
+  }
+};
 
 const props = defineProps({
   file: {
@@ -465,10 +532,15 @@ const emit = defineEmits(["download", "loaded", "error", "updated"]);
 
 // 文本内容（用于文本文件预览）
 const textContent = ref("");
+// 文本加载状态
+const isTextLoading = ref(false);
 // 加载错误状态
 const loadError = ref(false);
 // 认证预览URL
 const authenticatedPreviewUrl = ref(null);
+
+// 预览按钮相关状态
+const isGeneratingPreview = ref(false);
 
 // 编辑模式状态
 const isEditMode = ref(false);
@@ -812,6 +884,7 @@ const reinitializePreviewOnThemeChange = async () => {
 const loadTextContent = async () => {
   if (isText.value) {
     try {
+      isTextLoading.value = true;
       console.log("加载文本内容，URL:", previewUrl.value);
       // 使用预览URL并添加认证头信息
       const response = await fetch(previewUrl.value, {
@@ -832,6 +905,8 @@ const loadTextContent = async () => {
       console.error("加载文本内容错误:", error);
       textContent.value = "加载文本内容时出错";
       handleContentError();
+    } finally {
+      isTextLoading.value = false;
     }
   }
 };
@@ -1066,8 +1141,11 @@ const initMarkdownPreview = async () => {
       // 移除可能残留的主题相关类
       previewContainer.value.classList.remove("vditor-reset--dark", "vditor-reset--light");
 
+      // 懒加载Vditor
+      const VditorConstructor = await loadVditor();
+
       // 使用 Vditor 的预览 API 渲染内容
-      Vditor.preview(previewContainer.value, textContent.value, {
+      VditorConstructor.preview(previewContainer.value, textContent.value, {
         mode: "dark-light", // 支持明暗主题
         theme: {
           current: props.darkMode ? "dark" : "light", // 根据darkMode设置主题
@@ -1165,7 +1243,6 @@ const highlightAndFormatCode = () => {
   try {
     const fileType = fileTypeInfo.value;
     const language = (fileType && fileType.language) || "";
-    const isConfigFile = fileType && fileType.category === "config";
 
     // 1. 特殊处理 JSON (需要格式化)
     if (language === "json") {
@@ -1207,7 +1284,8 @@ const highlightAndFormatCode = () => {
 // 监听文件变更，重置状态
 watch(
     () => props.file,
-    () => {
+    (newFile) => {
+      // 重置所有状态
       textContent.value = "";
       loadError.value = false;
       authenticatedPreviewUrl.value = null;
@@ -1223,28 +1301,35 @@ watch(
       officePreviewTimedOut.value = false;
       clearPreviewLoadTimeout();
 
-      // 如果文件是图片、视频、音频或PDF类型，则获取认证预览URL
-      if (isImage.value || isVideo.value || isAudio.value || isPdf.value) {
-        fetchAuthenticatedUrl();
-      }
+      // 只有当文件存在时才初始化预览
+      if (newFile) {
+        // 对于文本文件，先设置加载状态，然后加载内容
+        if (isText.value) {
+          isTextLoading.value = true;
+          loadTextContent();
+        } else {
+          isTextLoading.value = false;
+        }
 
-      // 如果是Office文件，更新Office预览URL
-      if (isOffice.value) {
-        updateOfficePreviewUrls();
-      }
+        // 如果文件是图片、视频、音频或PDF类型，则获取认证预览URL
+        if (isImage.value || isVideo.value || isAudio.value || isPdf.value) {
+          fetchAuthenticatedUrl();
+        }
 
-      // 对于文本文件，需要手动加载内容
-      if (isText.value) {
-        loadTextContent();
+        // 如果是Office文件，更新Office预览URL
+        if (isOffice.value) {
+          updateOfficePreviewUrls();
+        }
+      } else {
+        isTextLoading.value = false;
       }
-    },
-    { immediate: true }
+    }
 );
 
 // 监听暗色模式变化
 watch(
     () => props.darkMode,
-    (newValue) => {
+    () => {
       reinitializePreviewOnThemeChange();
     }
 );
@@ -1266,6 +1351,32 @@ const handleDownload = () => {
   emit("download", props.file);
 };
 
+// 处理S3直链预览
+const handleS3DirectPreview = async () => {
+  if (isGeneratingPreview.value) return;
+
+  try {
+    isGeneratingPreview.value = true;
+
+    // 获取文件的S3直链
+    const fileLinkApi = props.isAdmin ? api.fs.getAdminFileLink : api.fs.getUserFileLink;
+    const response = await fileLinkApi(props.file.path, 3600, false); // 1小时过期，不强制下载
+
+    if (response && response.success && response.data && response.data.presignedUrl) {
+      // 在新窗口中打开S3直链
+      window.open(response.data.presignedUrl, "_blank");
+    } else {
+      console.error("获取S3直链失败:", response);
+      alert("获取S3直链失败: " + (response.message || "未知错误"));
+    }
+  } catch (error) {
+    console.error("S3直链预览错误:", error);
+    alert("S3直链预览失败: " + (error.message || "未知错误"));
+  } finally {
+    isGeneratingPreview.value = false;
+  }
+};
+
 /**
  * 格式化文件大小
  * @param {number} bytes - 文件大小（字节）
@@ -1275,27 +1386,17 @@ const formatFileSize = (bytes) => {
   return formatFileSizeUtil(bytes, true); // 使用中文单位
 };
 
+// 导入统一的时间处理工具
+import { formatDateTime } from "../../utils/timeUtils.js";
+
 /**
  * 格式化日期
- * @param {string} dateString - ISO格式的日期字符串
- * @returns {string} 格式化后的日期字符串
+ * @param {string} dateString - UTC 时间字符串
+ * @returns {string} 格式化后的本地时间字符串
  */
 const formatDate = (dateString) => {
   if (!dateString) return "";
-
-  const date = new Date(dateString);
-
-  // 判断是否为有效日期
-  if (isNaN(date.getTime())) return "";
-
-  // 格式化为 YYYY-MM-DD HH:MM
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
+  return formatDateTime(dateString);
 };
 
 // 切换下拉框显示状态
@@ -1323,53 +1424,10 @@ const handleClickOutside = (event) => {
 
 // 监听全局点击事件来关闭下拉框
 onMounted(() => {
-  // 加载文本内容（如果是文本文件）
-  if (isText.value) {
-    loadTextContent();
-  }
-
   // 添加事件监听器
   document.addEventListener("click", handleClickOutside);
   document.addEventListener("keydown", handleKeyDown);
   document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-  // 监听文件变更，自动加载预览
-  watch(
-      () => props.file,
-      () => {
-        // 重置状态
-        textContent.value = "";
-        loadError.value = false;
-        authenticatedPreviewUrl.value = null;
-        highlightedContent.value = "";
-        codeLanguage.value = "";
-        isMarkdownRendered.value = false;
-
-        // 重置Office预览状态
-        microsoftOfficePreviewUrl.value = "";
-        googleDocsPreviewUrl.value = "";
-        officePreviewLoading.value = false;
-        officePreviewError.value = "";
-        officePreviewTimedOut.value = false;
-        clearPreviewLoadTimeout();
-
-        // 如果文件是图片、视频、音频或PDF类型，则获取认证预览URL
-        if (isImage.value || isVideo.value || isAudio.value || isPdf.value) {
-          fetchAuthenticatedUrl();
-        }
-
-        // 如果是Office文件，更新Office预览URL
-        if (isOffice.value) {
-          updateOfficePreviewUrls();
-        }
-
-        // 对于文本文件，需要手动加载内容
-        if (isText.value) {
-          loadTextContent();
-        }
-      },
-      { immediate: true }
-  );
 });
 
 onUnmounted(() => {
@@ -1741,6 +1799,94 @@ button:hover svg {
   :deep(.vditor-reset) {
     font-size: 15px;
     padding: 0.25rem;
+  }
+}
+
+/* 移动端文件预览容器优化 */
+@media (max-width: 768px) {
+  .file-preview-container {
+    margin: 0 -1rem;
+    padding: 0 0.5rem;
+  }
+
+  .file-preview {
+    margin-bottom: 1rem !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+  }
+
+  /* 文件信息网格在移动端单列显示 */
+  .file-info {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+    padding: 0.75rem !important;
+  }
+
+  /* 按钮组在移动端更紧凑 */
+  .file-preview .flex.flex-wrap {
+    gap: 0.5rem !important;
+  }
+
+  /* 预览内容区域优化 */
+  .preview-content {
+    border-radius: 0.5rem !important;
+  }
+
+  /* 图片预览在移动端更充分利用空间 */
+  .image-preview {
+    padding: 0.5rem !important;
+  }
+
+  .image-preview img {
+    max-height: 60vh !important;
+  }
+
+  /* 视频预览优化 */
+  .video-preview {
+    padding: 0.5rem !important;
+  }
+
+  .video-preview video {
+    max-height: 50vh !important;
+  }
+
+  /* 音频预览优化 */
+  .audio-preview {
+    padding: 0.75rem !important;
+  }
+
+  /* PDF预览高度调整 */
+  .pdf-preview {
+    height: 60vh !important;
+  }
+
+  /* Office预览高度调整 */
+  .office-preview {
+    height: 65vh !important;
+  }
+
+  /* HTML预览优化 */
+  .html-preview iframe {
+    min-height: 50vh !important;
+  }
+
+  /* 代码预览和文本预览高度调整 */
+  .code-preview,
+  .text-preview,
+  .markdown-preview {
+    max-height: 60vh !important;
+    padding: 0.75rem !important;
+  }
+
+  /* 编辑器容器高度调整 */
+  .editor-container {
+    height: 50vh !important;
+  }
+
+  /* 模式选择器优化 */
+  .mode-selector {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
   }
 }
 

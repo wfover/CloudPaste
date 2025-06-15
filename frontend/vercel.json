@@ -35,6 +35,21 @@
       "continue": true
     },
     {
+      "src": "/sw.js",
+      "headers": { "cache-control": "no-cache, no-store, must-revalidate" },
+      "continue": true
+    },
+    {
+      "src": "/workbox-*.js",
+      "headers": { "cache-control": "no-cache, no-store, must-revalidate" },
+      "continue": true
+    },
+    {
+      "src": "/icons/(.*)",
+      "headers": { "cache-control": "public, max-age=2592000" },
+      "continue": true
+    },
+    {
       "src": "/(.*)",
       "headers": {
         "x-content-type-options": "nosniff",
@@ -47,6 +62,9 @@
     { "src": "/paste/.*", "dest": "/index.html" },
     { "src": "/file/.*", "dest": "/index.html" },
     { "src": "/admin", "dest": "/index.html" },
+    { "src": "/admin/.*", "dest": "/index.html" },
+    { "src": "/mount-explorer", "dest": "/index.html" },
+    { "src": "/mount-explorer/.*", "dest": "/index.html" },
     { "src": "/upload", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
